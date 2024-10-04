@@ -1,0 +1,274 @@
+===============================================task 1================================================================
+mysql> create database task_1
+    -> ;
+Query OK, 1 row affected (0.22 sec)
+
+mysql> use task_1;
+Database changed
+mysql> create table Employeedetail(id int,name char(20),address char(20),joining_date int);
+Query OK, 0 rows affected (0.89 sec)
+
+mysql> insert into employeedetail values('1','ram','shirdi','2020');
+Query OK, 1 row affected (0.20 sec)
+
+mysql> insert into employeedetail values('2','sham','kopargaon','2021');
+Query OK, 1 row affected (0.31 sec)
+
+mysql> insert into employeedetail values('3','kalpesh','pune','2022');
+Query OK, 1 row affected (0.12 sec)
+
+mysql> insert into employeedetail values('4','aditya','nashik','2023');
+Query OK, 1 row affected (0.07 sec)
+
+
+
+=================================================================================================================================
+
+mysql> create table Employeedetails(id int primary key,name char(20),address char(20),joining_date int);
+Query OK, 0 rows affected (0.50 sec)
+
+mysql> insert into employeedetails values('1','ram','shirdi','2020');
+Query OK, 1 row affected (0.17 sec)
+
+mysql> insert into employeedetails values('2','sham','kopargaon','2021');
+Query OK, 1 row affected (0.21 sec)
+
+mysql> insert into employeedetails values('3','kalpesh','pune','2022');
+Query OK, 1 row affected (0.17 sec)
+
+mysql> insert into employeedetails values('4','aditya','nashik','2023');
+Query OK, 1 row affected (0.21 sec)
+
+
+=============================================================================================================================
+
+
+mysql> CREATE TABLE EmployeeSalary ( id INT, salary INT,FOREIGN KEY (id) REFERENCES EmployeeDetails(id) );
+Query OK, 0 rows affected (1.25 sec)
+
+mysql> insert into employeesalary values('1','500000');
+Query OK, 1 row affected (0.20 sec)
+
+mysql> insert into employeesalary values('2','600000');
+Query OK, 1 row affected (0.09 sec)
+
+mysql> insert into employeesalary values('3','700000');
+Query OK, 1 row affected (0.08 sec)
+
+mysql> insert into employeesalary values('4','500000');
+Query OK, 1 row affected (0.12 sec)
+
+
+
+==============================================================================================================================
+
+mysql> create table employeeproject(id int ,project int,FOREIGN KEY (id) REFERENCES employeedetails(id));
+Query OK, 0 rows affected (1.38 sec)
+
+mysql> insert into employeeproject values('1','10');
+Query OK, 1 row affected (0.10 sec)
+
+mysql> insert into employeeproject values('2','20');
+Query OK, 1 row affected (0.11 sec)
+
+mysql> insert into employeeproject values('3','14');
+Query OK, 1 row affected (0.08 sec)
+
+mysql> insert into employeeproject values('4','4');
+Query OK, 1 row affected (0.11 sec)
+
+
+
+======================================================================================================================
+
+
+1.SQL Query to fetch records that are present in one table but not in another table.
+
+
+mysql> SELECT * FROM employeedetails e WHERE NOT EXISTS ( SELECT 1  FROM employeeproject ep  WHERE e.id = ep.id );
+
+
+Empty set (0.06 sec)
+
+================================================================================================================
+
+2.Fetch all employees who are not working on any project:
+
+SELECT *
+from employeedetails ed
+LEFT JOIN employeeproject ep ON ed.id = ep.id
+WHERE ep.id IS NULL;
+
+
+Empty set (0.12 sec)
+
+===============================================================================================================
+
+
+
+3.SQL query to fetch all the Employees from EmployeeDetails who joined in the Year 2020.
+
+mysql> SELECT *FROM EmployeeDetails WHERE joining_date= 2020;
++----+------+---------+--------------+
+| id | name | address | joining_date |
++----+------+---------+--------------+
+|  1 | ram  | shirdi  |         2020 |
++----+------+---------+--------------+
+1 row in set (0.02 sec)
+
+
+=======================================================================
+
+
+4.Fetch all employees from EmployeeDetails who have a salary record in EmployeeSalary.
+
+
+mysql> SELECT e.*
+    -> FROM EmployeeDetails e
+    -> INNER JOIN EmployeeSalary s ON e.id = s.id;
++----+---------+-----------+--------------+
+| id | name    | address   | joining_date |
++----+---------+-----------+--------------+
+|  1 | ram     | shirdi    |         2020 |
+|  2 | sham    | kopargaon |         2021 |
+|  3 | kalpesh | pune      |         2022 |
+|  4 | aditya  | nashik    |         2023 |
++----+---------+-----------+--------------+
+4 rows in set (0.00 sec)
+
+===============================================================================================
+
+
+5.Fetch employee names and salaries even if the salary value is not present for the employee.
+
+
+mysql> SELECT e.name, s.salary
+    -> FROM EmployeeDetails e
+    -> LEFT JOIN EmployeeSalary s ON e.id = s.id;
++---------+--------+
+| name    | salary |
++---------+--------+
+| ram     | 500000 |
+| sham    | 600000 |
+| kalpesh | 700000 |
+| aditya  | 500000 |
++---------+--------+
+4 rows in set (0.00 sec)
+
+
+==============================================================================================================
+
+
+
+6.Write an SQL query to fetch duplicate records from EmployeeDetails.
+
+mysql> select salary from employeesalary group by salary having count(*)>1;
++--------+
+| salary |
++--------+
+| 500000 |
++--------+
+1 row in set (0.15 sec)
+
+
+==================================================================================================================
+
+7.Write an SQL query to fetch only odd rows from the table.
+
+
+mysql> SELECT *
+    -> FROM employeedetails AS t1
+    -> WHERE (SELECT COUNT(*) FROM employeedetails AS t2 WHERE t2.id <= t1.id) % 2 = 1;
++----+---------+---------+--------------+
+| id | name    | address | joining_date |
++----+---------+---------+--------------+
+|  1 | ram     | shirdi  |         2020 |
+|  3 | kalpesh | pune    |         2022 |
++----+---------+---------+--------------+
+2 rows in set (0.04 sec)
+
+
+
+
+====================================================================================================
+8.Write a query to find the 3rd highest salary from a table without top or limit keyword.
+
+
+mysql> SELECT max(salary) AS thirdhighestsalary from employeesalary WHERE salary < (  SELECT MAX(salary) FROM EmployeeSalary   WHERE salary <    SELECT MAX(salary)    FROM EmployeeSalary)
+    -> );
++--------------------+
+| ThirdHighestSalary |
++--------------------+
+|             500000 |
++--------------------+
+1 row in set (0.00 sec)
+
+
+====================================================================================================================
+
+
+9.Write an SQL query to fetch a project-wise count of employees.
+
+
+
+
+mysql> SELECT project, COUNT(id) AS employee_count FROM employeeproject GROUP BY project;
++---------+----------------+
+| project | employee_count |
++---------+----------------+
+|      10 |              1 |
+|      20 |              1 |
+|      14 |              1 |
+|       4 |              1 |
++---------+----------------+
+4 rows in set (0.00 sec)
+
+mysql>
+
+
+
+=================================================================================================================
+
+10.. Write an SQL query to fetch all the Employees who are also
+managers
+
+
+CREATE TABLE manager ( id INT,
+    ->     mid INT,
+    ->     FOREIGN KEY (id) REFERENCES EmployeeDetails(id)
+
+
+
+mysql> insert into manager values('1','1');
+Query OK, 1 row affected (0.18 sec)
+
+mysql> insert into manager values('2','2');
+Query OK, 1 row affected (0.10 sec)
+
+mysql> insert into manager values('3','3');
+Query OK, 1 row affected (0.14 sec)
+
+mysql> insert into manager values('4','4');
+Query OK, 1 row affected (0.19 sec)
+
+
+
+SELECT *
+FROM employeedetails ed
+WHERE ed.id IN (
+    SELECT m.mid
+    FROM Manager m
+);
+
+
+
+
+========================================================================================================================================================================================================================================================================================================================
+
+
+
+
+
+
+
+
